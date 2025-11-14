@@ -1,6 +1,6 @@
 from django.db import models
-from boards_app.models import Board
 from auth_app.models import User
+from boards_app.models import Board
 
 class Task(models.Model):
     title = models.CharField(max_length=255)
