@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from boards_app.models import Board
-from task_app.models import Task
 from auth_app.models import User
+from task_app.api.serializers import TaskSerializer
 
 class MemberSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField()
@@ -14,13 +14,6 @@ class MemberSerializer(serializers.ModelSerializer):
         if hasattr(obj, "fullname"):
             return obj.fullname
         return f"{obj.first_name} {obj.last_name}".strip()
-
-class TaskSerializer(serializers.ModelSerializer):
-    assigned_to = MemberSerializer(read_only=True)
-
-    class Meta:
-        model = Task
-        fields = ['id', 'title', 'description', 'done', 'assigned_to']
 
 class BoardSerializer(serializers.ModelSerializer):
     members = MemberSerializer(many=True, read_only=True)
