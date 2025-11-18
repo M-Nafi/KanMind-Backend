@@ -11,9 +11,9 @@ class MemberSerializer(serializers.ModelSerializer):
         fields = ['id', 'fullname', 'email']
 
     def get_fullname(self, obj):
-        if hasattr(obj, "fullname"):
-            return obj.fullname
-        return f"{obj.first_name} {obj.last_name}".strip()
+        if getattr(obj, "fullname", None):
+            return str(obj.fullname).strip()
+        return f"{obj.first_name or ''} {obj.last_name or ''}".strip()
 
 class BoardSerializer(serializers.ModelSerializer):
     members = MemberSerializer(many=True, read_only=True)
