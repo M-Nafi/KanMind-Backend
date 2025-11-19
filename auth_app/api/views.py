@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from auth_app.models import User
 from .serializers import RegisterSerializer
 from rest_framework.views import APIView
+from rest_framework import viewsets
+from task_app.api.serializers import MemberSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -49,3 +51,8 @@ class EmailCheckView(APIView):
             })
         except User.DoesNotExist:
             return Response({'email': email, 'exists': False})
+        
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = MemberSerializer

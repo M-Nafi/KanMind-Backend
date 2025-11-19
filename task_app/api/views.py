@@ -1,12 +1,21 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from task_app.models import Task, Comment
-from task_app.api.serializers import TaskSerializer, CommentSerializer
+from task_app.api.serializers import (
+    TaskReadSerializer,
+    TaskWriteSerializer,
+    CommentSerializer,
+)
+
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return TaskWriteSerializer
+        return TaskReadSerializer
 
     @action(detail=True, methods=['get', 'post'])
     def comments(self, request, pk=None):
@@ -18,5 +27,17 @@ class TaskViewSet(viewsets.ModelViewSet):
             serializer = CommentSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save(task=task, author=request.user)
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], url_path='assigned-to-me')
+    def assigned_to_me(self, request):
+        tasks = Task.objects.filter(assigned_to=request.user)
+        serializer = TaskReadSerializer(tasks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='reviewing')
+    def reviewing(self, request):
+        tasks = Task.objects.filter(reviewer=request.user)
+        serializer = TaskReadSerializer(tasks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

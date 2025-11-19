@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from boards_app.models import Board
 from auth_app.models import User
-from task_app.api.serializers import TaskSerializer
+from task_app.api.serializers import TaskReadSerializer
 
 class MemberSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField()
@@ -17,7 +17,7 @@ class MemberSerializer(serializers.ModelSerializer):
 
 class BoardSerializer(serializers.ModelSerializer):
     members = MemberSerializer(many=True, read_only=True)
-    tasks = TaskSerializer(many=True, read_only=True)
+    tasks = TaskReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Board

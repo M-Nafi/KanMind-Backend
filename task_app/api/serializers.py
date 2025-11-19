@@ -3,6 +3,7 @@ from auth_app.models import User
 from boards_app.models import Board
 from task_app.models import Comment, Task
 
+
 class MemberSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField()
 
@@ -13,7 +14,7 @@ class MemberSerializer(serializers.ModelSerializer):
     def get_fullname(self, obj):
         if getattr(obj, "fullname", None):
             return str(obj.fullname).strip()
-        return f"{obj.first_name} {obj.last_name}".strip()
+        return f"{obj.first_name or ''} {obj.last_name or ''}".strip()
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -33,23 +34,43 @@ class CommentSerializer(serializers.ModelSerializer):
         return f"{obj.author.first_name or ''} {obj.author.last_name or ''}".strip()
 
 
-class TaskSerializer(serializers.ModelSerializer):
-    assigned_to = MemberSerializer(read_only=True)
+
+class TaskReadSerializer(serializers.ModelSerializer):
+    assignee = MemberSerializer(source="assigned_to", read_only=True)
+    reviewer = MemberSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task
         fields = [
             'id', 'title', 'description', 'done',
-            'board', 'assigned_to',
+            'board', 'assignee', 'reviewer',
             'due_date', 'priority', 'status', 'comments'
         ]
 
 
+class TaskWriteSerializer(serializers.ModelSerializer):
+    assignee = serializers.PrimaryKeyRelatedField(
+        source="assigned_to", queryset=User.objects.all(),
+        required=False, allow_null=True
+    )
+    reviewer = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False, allow_null=True
+    )
+
+    class Meta:
+        model = Task
+        fields = [
+            'title', 'description', 'done',
+            'board', 'assignee', 'reviewer',
+            'due_date', 'priority', 'status'
+        ]
+
+
 class BoardSerializer(serializers.ModelSerializer):
-    owner = MemberSerializer(read_only=True)                    
-    members = MemberSerializer(many=True, read_only=True)       
-    tasks = TaskSerializer(many=True, read_only=True, source="tasks")
+    owner = MemberSerializer(read_only=True)
+    members = MemberSerializer(many=True, read_only=True)
+    tasks = TaskReadSerializer(many=True, read_only=True, source="tasks")
 
     class Meta:
         model = Board
