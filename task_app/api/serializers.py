@@ -39,14 +39,26 @@ class TaskReadSerializer(serializers.ModelSerializer):
     assignee = MemberSerializer(source="assigned_to", read_only=True)
     reviewer = MemberSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    comments_count = serializers.SerializerMethodField()
+    last_comment = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         fields = [
             'id', 'title', 'description', 'done',
             'board', 'assignee', 'reviewer',
-            'due_date', 'priority', 'status', 'comments'
+            'due_date', 'priority', 'status',
+            'comments', 'comments_count', 'last_comment'
         ]
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
+
+    def get_last_comment(self, obj):
+        last = obj.comments.order_by('-created_at').first()
+        if last:
+            return last.text
+        return None
 
 
 class TaskWriteSerializer(serializers.ModelSerializer):
