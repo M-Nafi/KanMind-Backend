@@ -5,10 +5,11 @@ from task_app.api.serializers import TaskReadSerializer
 from auth_app.api.serializers import MemberSerializer
 
 class BoardSerializer(serializers.ModelSerializer):
+    owner = MemberSerializer(read_only=True)
     members = MemberSerializer(many=True, read_only=True)
     tasks = TaskReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Board
         fields = ['id', 'title', 'owner', 'members', 'tasks']
-        read_only_fields = ['owner', 'members', 'tasks']
+        read_only_fields = ['tasks']

@@ -23,13 +23,6 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     
 class MemberSerializer(serializers.ModelSerializer):
-    fullname = serializers.SerializerMethodField()
-
     class Meta:
         model = User
         fields = ['id', 'fullname', 'email']
-
-    def get_fullname(self, obj):
-        if getattr(obj, "fullname", None):
-            return str(obj.fullname).strip()
-        return f"{obj.first_name or ''} {obj.last_name or ''}".strip()

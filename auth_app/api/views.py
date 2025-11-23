@@ -13,6 +13,13 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        user = User.objects.get(id=response.data['id'])
+        token, _ = Token.objects.get_or_create(user=user)
+        response.data['token'] = token.key
+        return Response(response.data, status=201)
+
 class EmailAuthTokenView(ObtainAuthToken):
     permission_classes = [permissions.AllowAny]
 
