@@ -41,3 +41,16 @@ class TaskViewSet(viewsets.ModelViewSet):
         tasks = Task.objects.filter(reviewer=request.user)
         serializer = TaskReadSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        task_id = self.kwargs.get("task_pk")
+        return Comment.objects.filter(task_id=task_id)
+
+    def perform_create(self, serializer):
+        task_id = self.kwargs.get("task_pk")
+        task = Task.objects.get(pk=task_id)
+        serializer.save(task=task, author=self.request.user)
