@@ -7,7 +7,7 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     done = models.BooleanField(default=False)
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="tasks")
-    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks", null=True, blank=True)
+    assignee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks", null=True, blank=True)
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviewed_tasks", null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     priority = models.CharField(max_length=20, default="low")

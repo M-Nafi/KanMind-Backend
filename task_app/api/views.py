@@ -32,7 +32,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
-        tasks = Task.objects.filter(assigned_to=request.user)
+        tasks = Task.objects.filter(assignee=request.user)
         serializer = TaskReadSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -41,8 +41,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         tasks = Task.objects.filter(reviewer=request.user)
         serializer = TaskReadSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
