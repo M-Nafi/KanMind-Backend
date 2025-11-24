@@ -1,21 +1,25 @@
 # Environment variables
 .env
 
-# SQLite database
-*.sqlite3
-
-# Python cache
-__pycache__/
+# Django
+*.log
+*.pot
 *.pyc
+__pycache__/
+db.sqlite3
+
+# Media & static files
+/media
+/static
 
 # Virtual environments
 venv/
 .venv/
 
-# IDE configs
+# IDE / Editor settings
 .vscode/
 .idea/
 
-# Media/static files
-media/
-static/
+# OS files
+.DS_Store
+Thumbs.db
