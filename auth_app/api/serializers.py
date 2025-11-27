@@ -4,21 +4,27 @@ from auth_app.models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    repeated_password = serializers.CharField(write_only=True, required=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'fullname', 'email', 'password']
+        fields = ['id', 'fullname', 'email', 'password', 'repeated_password']
         extra_kwargs = {
             'password': {'write_only': True},
             'email': {'required': True},
             'fullname': {'required': True},
         }
 
+    def validate(self, attrs):
+        if attrs['password'] != attrs['repeated_password']:
+            raise serializers.ValidationError(
+                {"repeated_password": "Passwords do not match"}
+            )
+        return attrs
+
     def create(self, validated_data):
+        validated_data.pop('repeated_password')
         validated_data['password'] = make_password(validated_data['password'])
-        if not validated_data.get('email'):
-            raise serializers.ValidationError({'email': 'Email is required'})
-        if not validated_data.get('fullname'):
-            raise serializers.ValidationError({'fullname': 'Fullname is required'})
         validated_data.setdefault('username', validated_data['email'])
         return super().create(validated_data)
     

@@ -55,12 +55,13 @@ class EmailAuthTokenView(ObtainAuthToken):
         return Response({
             'token': token.key,
             'fullname': user.fullname,
-            'email': user.email
+            'email': user.email,
+            'user_id': user.id
         })
 
 
 class EmailCheckView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         email = request.query_params.get('email')
@@ -72,20 +73,17 @@ class EmailCheckView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            user_id = request.user.id if request.user.is_authenticated else 'anonymous'
-            PENDING_MEMBERS[user_id] = email
-            
             return Response({
-                'email': email,
-                'exists': True,
+                'id': user.id,
+                'email': user.email,
                 'fullname': user.fullname
-            })
+            }, status=200)
         except User.DoesNotExist:
-            return Response({
-                'email': email,
-                'exists': False
-            })
-
+            return Response(
+                {'error': 'Email not found'},
+                status=404
+            )
+        
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
