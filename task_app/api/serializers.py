@@ -25,6 +25,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class TaskReadSerializer(serializers.ModelSerializer):
     assignee = MemberSerializer(read_only=True)
     reviewer = MemberSerializer(read_only=True)
+    assignee_id = serializers.IntegerField(source='assignee.id', read_only=True, allow_null=True)
+    reviewer_id = serializers.IntegerField(source='reviewer.id', read_only=True, allow_null=True)
     comments = CommentSerializer(many=True, read_only=True)
     comments_count = serializers.SerializerMethodField()
     last_comment = serializers.SerializerMethodField()
@@ -34,6 +36,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'done',
             'board', 'assignee', 'reviewer',
+            'assignee_id', 'reviewer_id',
             'due_date', 'priority', 'status',
             'comments', 'comments_count', 'last_comment'
         ]
@@ -47,54 +50,55 @@ class TaskReadSerializer(serializers.ModelSerializer):
 
 
 class TaskWriteSerializer(serializers.ModelSerializer):
-    assignee = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False, allow_null=True
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+        source='assignee',
+        write_only=True
     )
-    reviewer = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False, allow_null=True
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+        source='reviewer',
+        write_only=True
     )
 
     class Meta:
         model = Task
         fields = [
-            'title', 'description', 'done',
-            'board', 'assignee', 'reviewer',
+            'title', 'description', 'done', 'board', 
+            'assignee_id', 'reviewer_id',
             'due_date', 'priority', 'status'
         ]
-
-    def _resolve_user_by_email(self, email):
-        try:
-            return User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError({"email": f"User mit E-Mail '{email}' nicht gefunden."})
+    
+    def to_internal_value(self, data):
+        cleaned_data = {k: v for k, v in data.items() if v is not None}
+        return super().to_internal_value(cleaned_data)
 
     def validate(self, attrs):
         board = attrs.get("board")
-        if not board:
-            return attrs
-
-        assignee_email = attrs.pop("assignee_email", None)
-        if assignee_email and not attrs.get("assignee"):
-            attrs["assignee"] = self._resolve_user_by_email(assignee_email)
-
-        reviewer_emails = attrs.pop("reviewer_emails", None)
-        if reviewer_emails and not attrs.get("reviewers"):
-            resolved = [self._resolve_user_by_email(e) for e in reviewer_emails]
-            attrs["reviewers"] = resolved
-
-        assignee = attrs.get("assignee", None)
-        reviewers = attrs.get("reviewers", [])
-
-        allowed = set(board.members.all()) | {board.owner}
-
-        if assignee and assignee not in allowed:
-            raise serializers.ValidationError({"assignee": "Assignee muss Mitglied oder Owner des Boards sein."})
-
-        for r in reviewers:
-            if r not in allowed:
-                raise serializers.ValidationError({"reviewers": "Alle Reviewer müssen Mitglieder oder Owner des Boards sein."})
-
+        assignee = attrs.get("assignee")
+        reviewer = attrs.get("reviewer")
+        if not board and self.instance:
+            board = self.instance.board
+            
+        if board:
+            allowed = set(board.members.all()) | {board.owner}
+            if assignee and assignee not in allowed:
+                raise serializers.ValidationError({
+                    "assignee_id": "Assignee muss Mitglied oder Owner des Boards sein."
+                })
+            if reviewer and reviewer not in allowed:
+                raise serializers.ValidationError({
+                    "reviewer_id": "Reviewer muss Mitglied oder Owner des Boards sein."
+                })
         return attrs
+    
+    def create(self, validated_data):
+        task = super().create(validated_data)
+        return task
 
     def create(self, validated_data):
         reviewers = validated_data.pop("reviewers", [])
@@ -109,6 +113,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
         if reviewers is not None:
             task.reviewers.set(reviewers)
         return task
+
 
 class BoardSerializer(serializers.ModelSerializer):
     owner = MemberSerializer(read_only=True)

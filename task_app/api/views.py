@@ -1,17 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from task_app.models import Task, Comment
-from task_app.api.serializers import (
-    TaskReadSerializer,
-    TaskWriteSerializer,
-    CommentSerializer,
-)
+from task_app.api.serializers import TaskReadSerializer, TaskWriteSerializer, CommentSerializer
+from task_app.api.permissions import IsTaskBoardMember
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
-
+    permission_classes = [IsAuthenticated, IsTaskBoardMember]
+    
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return TaskWriteSerializer
@@ -20,6 +19,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get', 'post'])
     def comments(self, request, pk=None):
         task = self.get_object()
+        
         if request.method == 'GET':
             serializer = CommentSerializer(task.comments.all(), many=True)
             return Response(serializer.data)
@@ -42,8 +42,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = TaskReadSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         task_id = self.kwargs.get("task_pk")

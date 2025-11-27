@@ -1,6 +1,7 @@
 from django.db import models
 from auth_app.models import User
 
+
 class Board(models.Model):
     title = models.CharField(max_length=255)
     owner = models.ForeignKey(

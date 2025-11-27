@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
 from task_app.api.views import TaskViewSet, CommentViewSet
 
+
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet, basename='task')
 
