@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from task_app.models import Task, Comment
 from task_app.api.serializers import TaskReadSerializer, TaskWriteSerializer, CommentSerializer
-from task_app.api.permissions import IsTaskBoardMember
+from task_app.api.permissions import IsTaskBoardMember, IsTaskCreatorOrBoardOwner, IsCommentAuthor
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -16,19 +16,13 @@ class TaskViewSet(viewsets.ModelViewSet):
             return TaskWriteSerializer
         return TaskReadSerializer
 
-    @action(detail=True, methods=['get', 'post'])
-    def comments(self, request, pk=None):
-        task = self.get_object()
-        
-        if request.method == 'GET':
-            serializer = CommentSerializer(task.comments.all(), many=True)
-            return Response(serializer.data)
-        elif request.method == 'POST':
-            serializer = CommentSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(task=task, author=request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_permissions(self):
+        if self.action == 'destroy':
+            return [IsAuthenticated(), IsTaskCreatorOrBoardOwner()]
+        return [IsAuthenticated(), IsTaskBoardMember()]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
     @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
@@ -50,6 +44,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         task_id = self.kwargs.get("task_pk")
         return Comment.objects.filter(task_id=task_id)
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            return [IsAuthenticated(), IsCommentAuthor()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         task_id = self.kwargs.get("task_pk")

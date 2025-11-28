@@ -4,11 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from auth_app.models import User
-from .serializers import RegisterSerializer
-from task_app.api.serializers import MemberSerializer
+from .serializers import RegisterSerializer, MemberSerializer
 from .permissions import IsSelfOrBoardMember
-
-PENDING_MEMBERS = {}
 
 
 class RegisterView(generics.CreateAPIView):
@@ -21,6 +18,7 @@ class RegisterView(generics.CreateAPIView):
         user = User.objects.get(id=response.data['id'])
         token, _ = Token.objects.get_or_create(user=user)
         response.data['token'] = token.key
+        response.data['user_id'] = user.id
         return Response(response.data, status=201)
 
 
@@ -36,7 +34,6 @@ class EmailAuthTokenView(ObtainAuthToken):
                 {'error': 'email and password are required'}, 
                 status=400
             )
-
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -44,7 +41,7 @@ class EmailAuthTokenView(ObtainAuthToken):
                 {'error': 'Invalid email or password'}, 
                 status=400
             )
-
+        
         if not user.check_password(password):
             return Response(
                 {'error': 'Invalid email or password'}, 
@@ -83,9 +80,3 @@ class EmailCheckView(APIView):
                 {'error': 'Email not found'},
                 status=404
             )
-        
-
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = MemberSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSelfOrBoardMember]
