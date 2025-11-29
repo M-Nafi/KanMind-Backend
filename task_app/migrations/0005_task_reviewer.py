@@ -16,6 +16,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='reviewer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='reviewed_tasks', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='reviewed_tasks',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

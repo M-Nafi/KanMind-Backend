@@ -15,25 +15,55 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='comment',
-            options={'ordering': ['created_at'], 'verbose_name': 'Comment', 'verbose_name_plural': 'Comments'},
+            options={
+                'ordering': ['created_at'],
+                'verbose_name': 'Comment',
+                'verbose_name_plural': 'Comments'},
         ),
         migrations.AlterModelOptions(
             name='task',
-            options={'ordering': ['-id'], 'verbose_name': 'Task', 'verbose_name_plural': 'Tasks'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Task',
+                'verbose_name_plural': 'Tasks'},
         ),
         migrations.AddField(
             model_name='task',
             name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='created_tasks', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='created_tasks',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='task',
             name='priority',
-            field=models.CharField(blank=True, choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], max_length=50),
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ('low',
+                     'Low'),
+                    ('medium',
+                     'Medium'),
+                    ('high',
+                     'High')],
+                max_length=50),
         ),
         migrations.AlterField(
             model_name='task',
             name='status',
-            field=models.CharField(choices=[('to-do', 'To Do'), ('in-progress', 'In Progress'), ('review', 'Review'), ('done', 'Done')], default='to-do', max_length=50),
+            field=models.CharField(
+                choices=[
+                    ('to-do',
+                     'To Do'),
+                    ('in-progress',
+                     'In Progress'),
+                    ('review',
+                     'Review'),
+                    ('done',
+                     'Done')],
+                default='to-do',
+                max_length=50),
         ),
     ]

@@ -16,11 +16,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='board',
             name='members',
-            field=models.ManyToManyField(blank=True, related_name='member_boards', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True,
+                related_name='member_boards',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='board',
             name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_boards', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='owned_boards',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

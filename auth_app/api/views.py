@@ -1,11 +1,10 @@
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from auth_app.models import User
-from .serializers import RegisterSerializer, MemberSerializer
-from .permissions import IsSelfOrBoardMember
+from .serializers import RegisterSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -48,20 +47,20 @@ class EmailAuthTokenView(ObtainAuthToken):
 
         if not email or not password:
             return Response(
-                {'error': 'email and password are required'}, 
+                {'error': 'email and password are required'},
                 status=400
             )
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {'error': 'Invalid email or password'}, 
+                {'error': 'Invalid email or password'},
                 status=400
             )
-        
+
         if not user.check_password(password):
             return Response(
-                {'error': 'Invalid email or password'}, 
+                {'error': 'Invalid email or password'},
                 status=400
             )
 
@@ -90,7 +89,7 @@ class EmailCheckView(APIView):
         email = request.query_params.get('email')
         if not email:
             return Response(
-                {'error': 'Email parameter is required'}, 
+                {'error': 'Email parameter is required'},
                 status=400
             )
         try:

@@ -12,8 +12,8 @@ class IsSelfOrBoardMember(permissions.BasePermission):
         """
         if obj == request.user:
             return True
-        
+
         user_boards = request.user.member_boards.all() | request.user.owned_boards.all()
         target_boards = obj.member_boards.all() | obj.owned_boards.all()
-        
+
         return bool(user_boards & target_boards)

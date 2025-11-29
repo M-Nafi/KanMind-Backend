@@ -16,21 +16,35 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='assignee',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_tasks', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='assigned_tasks',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='task',
             name='priority',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(
+                blank=True,
+                max_length=50),
         ),
         migrations.AlterField(
             model_name='task',
             name='reviewer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewed_tasks', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='reviewed_tasks',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='task',
             name='status',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(
+                blank=True,
+                max_length=50),
         ),
     ]

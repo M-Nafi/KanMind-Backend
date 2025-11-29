@@ -25,15 +25,15 @@ class BoardViewSet(viewsets.ModelViewSet):
     - On create: automatically assigns the requesting user as the board owner.
     """
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         user = self.request.user
-        
+
         if self.action == 'list':
             return Board.objects.filter(
                 models.Q(owner=user) | models.Q(members=user)
             ).distinct()
-        
+
         return Board.objects.all()
 
     def get_serializer_class(self):

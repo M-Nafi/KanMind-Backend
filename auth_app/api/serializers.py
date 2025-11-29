@@ -15,7 +15,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     - Returns the created User instance.
     """
     repeated_password = serializers.CharField(write_only=True, required=True)
-    
+
     class Meta:
         model = User
         fields = ['id', 'fullname', 'email', 'password', 'repeated_password']
@@ -37,9 +37,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['repeated_password']:
-            raise serializers.ValidationError(
-                {"repeated_password": "Passwords do not match"}
-            )
+            raise serializers.ValidationError({
+                "repeated_password": "Passwords do not match"
+            })
         return attrs
 
     def create(self, validated_data):
@@ -47,8 +47,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data['password'] = make_password(validated_data['password'])
         validated_data.setdefault('username', validated_data['email'])
         return super().create(validated_data)
-    
-    
+
+
 class MemberSerializer(serializers.ModelSerializer):
     """
     Lightweight serializer for user membership representation.

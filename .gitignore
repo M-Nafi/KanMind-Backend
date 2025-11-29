@@ -16,6 +16,11 @@ db.sqlite3-journal
 /static/
 /media/
 
+# Coverage
+.coverage
+htmlcov/
+.coverage.*
+
 # IDE
 .vscode/
 .idea/

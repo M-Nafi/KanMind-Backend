@@ -26,12 +26,12 @@ class BoardListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = [
-            'id', 
-            'title', 
-            'member_count', 
-            'ticket_count', 
-            'tasks_to_do_count', 
-            'tasks_high_prio_count', 
+            'id',
+            'title',
+            'member_count',
+            'ticket_count',
+            'tasks_to_do_count',
+            'tasks_high_prio_count',
             'owner_id'
         ]
 
@@ -86,7 +86,8 @@ class BoardCreateUpdateSerializer(serializers.ModelSerializer):
         required=False
     )
     owner_data = MemberSerializer(source='owner', read_only=True)
-    members_data = MemberSerializer(source='members', many=True, read_only=True)
+    members_data = MemberSerializer(
+        source='members', many=True, read_only=True)
 
     class Meta:
         model = Board
@@ -96,21 +97,21 @@ class BoardCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         member_ids = validated_data.pop('members', [])
         board = Board.objects.create(**validated_data)
-        
+
         if member_ids:
             members = User.objects.filter(id__in=member_ids)
             board.members.set(members)
-        
+
         return board
 
     def update(self, instance, validated_data):
         member_ids = validated_data.pop('members', None)
-        
+
         instance.title = validated_data.get('title', instance.title)
         instance.save()
-        
+
         if member_ids is not None:
             members = User.objects.filter(id__in=member_ids)
             instance.members.set(members)
-        
+
         return instance

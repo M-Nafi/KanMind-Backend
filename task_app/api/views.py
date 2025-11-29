@@ -8,9 +8,24 @@ from task_app.api.permissions import IsTaskBoardMember, IsTaskCreatorOrBoardOwne
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing tasks.
+
+    - Requires authentication and board membership for most actions.
+    - Serializer selection:
+        * create/update/partial_update: TaskWriteSerializer
+        * other actions: TaskReadSerializer
+    - Permission rules:
+        * destroy: only task creator or board owner can delete
+        * other actions: board members or owner
+    - On create: automatically sets the requesting user as task creator.
+    - Custom actions:
+        * assigned-to-me: returns tasks assigned to the requesting user.
+        * reviewing: returns tasks where the requesting user is the reviewer.
+    """
     queryset = Task.objects.all()
     permission_classes = [IsAuthenticated, IsTaskBoardMember]
-    
+
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return TaskWriteSerializer
@@ -38,6 +53,17 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing comments on tasks.
+
+    - Requires authentication for all actions.
+    - Queryset is restricted to comments belonging to the given task (task_pk).
+    - Permission rules:
+        * destroy: only the comment author can delete
+        * other actions: any authenticated user
+    - On create: automatically assigns the requesting user as author
+      and links the comment to the specified task.
+    """
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 

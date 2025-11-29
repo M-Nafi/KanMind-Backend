@@ -5,6 +5,13 @@ from auth_app.api.serializers import MemberSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for comments.
+
+    - Maps Comment model fields to API representation.
+    - Exposes: id, content (mapped from 'text'), author, created_at.
+    - Author is returned as fullname if available, otherwise username.
+    """
     author = serializers.SerializerMethodField()
 
     class Meta:
@@ -19,6 +26,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TaskReadSerializer(serializers.ModelSerializer):
+    """
+    Read-only serializer for tasks.
+
+    - Provides detailed task information for API responses.
+    - Includes nested assignee and reviewer data via MemberSerializer.
+    - Adds comments_count as a computed field.
+    - Exposes: id, board, title, description, status, priority,
+      assignee, reviewer, due_date, comments_count.
+    """
     assignee = MemberSerializer(read_only=True)
     reviewer = MemberSerializer(read_only=True)
     comments_count = serializers.SerializerMethodField()
@@ -35,6 +51,15 @@ class TaskReadSerializer(serializers.ModelSerializer):
 
 
 class TaskWriteSerializer(serializers.ModelSerializer):
+    """
+    Write serializer for tasks (create/update).
+
+    - Accepts assignee_id and reviewer_id as user references.
+    - Validates that assignee and reviewer are either board members or the board owner.
+    - Prevents changing the board association of an existing task.
+    - Exposes: board, title, description, status, priority,
+      assignee_id, reviewer_id, due_date.
+    """
     assignee_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         required=False,
@@ -59,15 +84,15 @@ class TaskWriteSerializer(serializers.ModelSerializer):
         board = attrs.get("board")
         assignee = attrs.get("assignee")
         reviewer = attrs.get("reviewer")
-        
+
         if not board and self.instance:
             board = self.instance.board
-        
+
         if self.instance and board and board != self.instance.board:
             raise serializers.ValidationError({
                 "board": "Das Ändern der Board-ID ist nicht erlaubt!"
             })
-            
+
         if board:
             allowed = set(board.members.all()) | {board.owner}
             if assignee and assignee not in allowed:
