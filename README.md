@@ -147,6 +147,8 @@ python manage.py runserver
 
 
 ## Project Structure
+
+```
 kanmind_backend/
 ├── auth_app/           # User authentication and management
 │   ├── api/
@@ -179,7 +181,7 @@ kanmind_backend/
 ├── manage.py
 ├── requirements.txt
 └── README.md
-
+```
 
 ## License
 
