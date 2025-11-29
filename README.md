@@ -16,20 +16,15 @@ Provides user authentication, board management, task tracking, and commenting fe
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [API Documentation](#api-documentation)
-  - Authentication
-  - Boards
-  - Tasks
-  - Comments
+- [API Endpoints](#api-endpoints)
+  - [Authentication](#authentication)
+  - [Boards](#boards)
+  - [Tasks](#tasks)
+  - [Comments](#comments)
+  - [Dashboard](#dashboard)
 - [Project Structure](#project-structure)
-- [Authentication & Permissions](#authentication--permissions)
-- [Admin Panel](#admin-panel)
-- [Development](#development)
-- [CORS](#cors)
-- [Environment Variables](#environment-variables)
 - [License](#license)
-- [Contributing](#contributing)
-- [Support](#support)
+- [Frontend](#frontend)
 
 ---
 
