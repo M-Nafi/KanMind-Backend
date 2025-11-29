@@ -9,6 +9,14 @@ from .permissions import IsSelfOrBoardMember
 
 
 class RegisterView(generics.CreateAPIView):
+    """
+    API endpoint for user registration.
+
+    - Accepts user data via RegisterSerializer.
+    - Creates a new User instance with hashed password.
+    - Automatically generates and returns an authentication token.
+    - Response includes: token, user_id, and the created user data.
+    """
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -23,6 +31,15 @@ class RegisterView(generics.CreateAPIView):
 
 
 class EmailAuthTokenView(ObtainAuthToken):
+    """
+    API endpoint for authentication using email and password.
+
+    - Validates that both email and password are provided.
+    - Checks if the user exists and the password is correct.
+    - Returns an authentication token along with basic user info:
+      fullname, email, and user_id.
+    - Returns error responses for invalid credentials or missing fields.
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -58,6 +75,15 @@ class EmailAuthTokenView(ObtainAuthToken):
 
 
 class EmailCheckView(APIView):
+    """
+    API endpoint to check if a user with a given email exists.
+
+    - Requires authentication.
+    - Accepts 'email' as a query parameter.
+    - If the user exists, returns id, email, and fullname.
+    - If not found, returns a 404 error.
+    - If no email parameter is provided, returns a 400 error.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -67,7 +93,6 @@ class EmailCheckView(APIView):
                 {'error': 'Email parameter is required'}, 
                 status=400
             )
-
         try:
             user = User.objects.get(email=email)
             return Response({
