@@ -7,13 +7,34 @@ from .permissions import IsBoardMemberOrOwner, IsBoardOwner
 
 
 class BoardViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing boards.
+
+    - Requires authentication for all actions.
+    - Queryset behavior:
+        * list: returns boards where the user is owner or member.
+        * other actions: returns all boards.
+    - Serializer selection:
+        * list: uses BoardListSerializer (summary view).
+        * retrieve: uses BoardDetailSerializer (detailed view).
+        * create/update/partial_update: uses BoardCreateUpdateSerializer.
+    - Permission rules:
+        * destroy: only board owners can delete.
+        * update/partial_update/retrieve: allowed for board owners or members.
+        * other actions: requires authentication only.
+    - On create: automatically assigns the requesting user as the board owner.
+    """
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         user = self.request.user
-        return Board.objects.filter(
-            models.Q(owner=user) | models.Q(members=user)
-        ).distinct()
+        
+        if self.action == 'list':
+            return Board.objects.filter(
+                models.Q(owner=user) | models.Q(members=user)
+            ).distinct()
+        
+        return Board.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'list':

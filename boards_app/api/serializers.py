@@ -6,6 +6,17 @@ from auth_app.api.serializers import MemberSerializer
 
 
 class BoardListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing boards with summary information.
+
+    - Provides board id and title.
+    - Includes aggregated counts:
+        * member_count: number of board members
+        * ticket_count: total number of tasks
+        * tasks_to_do_count: tasks with status 'to-do'
+        * tasks_high_prio_count: tasks with priority 'high'
+    - Exposes the owner's id.
+    """
     member_count = serializers.SerializerMethodField()
     ticket_count = serializers.SerializerMethodField()
     tasks_to_do_count = serializers.SerializerMethodField()
@@ -38,6 +49,14 @@ class BoardListSerializer(serializers.ModelSerializer):
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for detailed board representation.
+
+    - Provides board id, title, and owner_id.
+    - Includes nested member data via MemberSerializer.
+    - Includes nested task data via TaskReadSerializer.
+    - All related fields (owner_id, members, tasks) are read-only.
+    """
     owner_id = serializers.IntegerField(source='owner.id', read_only=True)
     members = MemberSerializer(many=True, read_only=True)
     tasks = TaskReadSerializer(many=True, read_only=True)
@@ -49,6 +68,18 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
 
 class BoardCreateUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating and updating boards.
+
+    - Accepts a list of member IDs for assignment (write-only).
+    - Exposes owner_data and members_data via MemberSerializer (read-only).
+    - On create:
+        * Creates a new board with provided title and owner.
+        * Assigns members if member IDs are provided.
+    - On update:
+        * Updates the board title.
+        * Replaces members if member IDs are provided.
+    """
     members = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True,
